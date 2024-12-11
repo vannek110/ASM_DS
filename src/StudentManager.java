@@ -99,70 +99,63 @@ public class StudentManager {
         return result;
     }
 
-    // Sort students by marks (Bubble Sort algorithm)
+    // Sort students by marks (Quick Sort algorithm)
     public void sortStudentsByMarks(boolean ascending) {
-        saveState(); // Save the current state before sorting
+        // Convert stack to an array
+        int stackSize = studentStack.size();
+        Student[] studentArray = new Student[stackSize];
+        int index = 0;
 
-        // Transfer data from stack to a temporary list
-        List<Student> studentList = new ArrayList<>();
+        // Pop all elements from the stack into the array
         while (!studentStack.isEmpty()) {
-            studentList.add(studentStack.pop());
+            studentArray[index++] = studentStack.pop();
         }
 
-        // Call Quick Sort on the list
-        quickSort(studentList, 0, studentList.size() - 1, ascending);
+        // Apply QuickSort on the array
+        quickSort(studentArray, 0, studentArray.length - 1, ascending);
 
-        // Transfer sorted data back to the stack
-        for (int i = studentList.size() - 1; i >= 0; i--) {
-            studentStack.push(studentList.get(i));
+        // Push the sorted elements back into the stack
+        for (int i = studentArray.length - 1; i >= 0; i--) {
+            studentStack.push(studentArray[i]);
         }
 
-        // Print the sorted list
+        // Print sorted students
         System.out.println("Students sorted by marks " + (ascending ? "(Ascending):" : "(Descending):"));
-        for (Student student : studentList) {
+        for (Student student : studentArray) {
             System.out.println(student);
         }
     }
 
-    // Helper method to perform Quick Sort
-    private void quickSort(List<Student> list, int low, int high, boolean ascending) {
+    // QuickSort implementation
+    private void quickSort(Student[] array, int low, int high, boolean ascending) {
         if (low < high) {
-            // Find pivot index such that elements smaller than pivot are on the left and greater on the right
-            int pivotIndex = partition(list, low, high, ascending);
-
-            // Recursively sort elements before and after the pivot
-            quickSort(list, low, pivotIndex - 1, ascending);
-            quickSort(list, pivotIndex + 1, high, ascending);
+            int pivotIndex = partition(array, low, high, ascending);
+            quickSort(array, low, pivotIndex - 1, ascending);
+            quickSort(array, pivotIndex + 1, high, ascending);
         }
     }
 
-    // Partition method for Quick Sort
-    private int partition(List<Student> list, int low, int high, boolean ascending) {
-        // Choose the pivot element (last element in the list)
-        Student pivot = list.get(high);
-        int i = (low - 1); // Index of smaller element
-
-        // Compare each element with the pivot
+    // Partition method for QuickSort
+    private int partition(Student[] array, int low, int high, boolean ascending) {
+        Student pivot = array[high];
+        int i = low - 1;
         for (int j = low; j < high; j++) {
             boolean condition = ascending
-                    ? list.get(j).getMarks() < pivot.getMarks()  // Ascending order
-                    : list.get(j).getMarks() > pivot.getMarks(); // Descending order
+                    ? array[j].getMarks() < pivot.getMarks()
+                    : array[j].getMarks() > pivot.getMarks();
 
             if (condition) {
                 i++;
-                // Swap list[i] and list[j]
-                Student temp = list.get(i);
-                list.set(i, list.get(j));
-                list.set(j, temp);
+                Student temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
             }
         }
+        Student temp = array[i + 1];
+        array[i + 1] = array[high];
+        array[high] = temp;
 
-        // Swap the pivot element with the element at i+1
-        Student temp = list.get(i + 1);
-        list.set(i + 1, list.get(high));
-        list.set(high, temp);
-
-        return i + 1; // Return the pivot index
+        return i + 1;
     }
 
 

@@ -29,15 +29,20 @@ public class Main {
                         System.out.print("Enter ID: ");
                         String id = scanner.nextLine();
                         if (id.isEmpty()) throw new IllegalArgumentException("Student ID cannot be empty.");
+                        if (isIdDuplicate(manager, id)) {
+                            System.out.println("Student ID already exists. Please enter a unique ID.");
+                            break;
+                        }
 
                         System.out.print("Enter name: ");
                         String name = scanner.nextLine();
+                        if (!isValidName(name)) {
+                            System.out.println("Invalid name. Name cannot be empty.");
+                            break;
+                        }
 
                         System.out.print("Enter marks: ");
-                        double marks = scanner.nextDouble();
-                        if (marks < 0 || marks > 10) {
-                            throw new IllegalArgumentException("Marks must be between 0 and 10.");
-                        }
+                        double marks = readValidMarks(scanner);
 
                         manager.addStudent(new Student(id, name, marks));
                         break;
@@ -47,15 +52,20 @@ public class Main {
                         System.out.print("Enter student ID to edit: ");
                         String editId = scanner.nextLine();
                         if (editId.isEmpty()) throw new IllegalArgumentException("Student ID cannot be empty.");
+                        if (manager.searchStudentById(editId) == null) {
+                            System.out.println("Student not found.");
+                            break;
+                        }
 
                         System.out.print("Enter new name: ");
                         String newName = scanner.nextLine();
+                        if (!isValidName(newName)) {
+                            System.out.println("Invalid name. Name cannot be empty.");
+                            break;
+                        }
 
                         System.out.print("Enter new marks: ");
-                        double newMarks = scanner.nextDouble();
-                        if (newMarks < 0 || newMarks > 10) {
-                            throw new IllegalArgumentException("Marks must be between 0 and 10.");
-                        }
+                        double newMarks = readValidMarks(scanner);
 
                         manager.editStudent(editId, newName, newMarks);
                         break;
@@ -65,6 +75,10 @@ public class Main {
                         System.out.print("Enter student ID to delete: ");
                         String deleteId = scanner.nextLine();
                         if (deleteId.isEmpty()) throw new IllegalArgumentException("Student ID cannot be empty.");
+                        if (manager.searchStudentById(deleteId) == null) {
+                            System.out.println("Student not found.");
+                            break;
+                        }
 
                         manager.deleteStudent(deleteId);
                         break;
@@ -122,5 +136,32 @@ public class Main {
                 System.out.println("Unexpected error occurred: " + e.getMessage());
             }
         }
+    }
+
+    // Helper method to read valid marks input
+    private static double readValidMarks(Scanner scanner) {
+        double marks = -1;
+        while (marks < 0 || marks > 10) {
+            try {
+                marks = scanner.nextDouble();
+                if (marks < 0 || marks > 10) {
+                    System.out.println("Marks must be between 0 and 10. Please enter again.");
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("Invalid input. Please enter a valid number for marks.");
+                scanner.nextLine();  // Consume the invalid input
+            }
+        }
+        return marks;
+    }
+
+    // Method to check if the student ID already exists
+    private static boolean isIdDuplicate(StudentManager manager, String id) {
+        return manager.searchStudentById(id) != null;
+    }
+
+    // Method to validate the student's name (non-empty)
+    private static boolean isValidName(String name) {
+        return name != null && !name.trim().isEmpty();
     }
 }

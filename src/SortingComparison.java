@@ -1,138 +1,136 @@
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class SortingComparison {
 
-    // Generate a list of 1000 random students
-    public static List<Student> generateRandomStudents(int count) {
-        List<Student> students = new ArrayList<>();
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Nhập số lượng sinh viên
+        System.out.print("Enter the number of students: ");
+        int n = scanner.nextInt();
+
+        // Tạo danh sách sinh viên ngẫu nhiên
+        Student[] students = generateRandomStudents(n);
+
+
+        // So sánh thời gian chạy của các thuật toán sắp xếp
+        compareSortingAlgorithms(students);
+    }
+
+    // Hàm tạo danh sách sinh viên ngẫu nhiên
+    public static Student[] generateRandomStudents(int n) {
+        Student[] students = new Student[n];
         Random random = new Random();
 
-        for (int i = 0; i < count; i++) {
-            String id = "S" + (i + 1);  // Simple ID generation (S1, S2, ...)
-            String name = "Student " + (i + 1);
-            double marks = 50 + (random.nextDouble() * 50);  // Random marks between 50 and 100
-            students.add(new Student(id, name, marks));
+        for (int i = 0; i < n; i++) {
+            String id = "ID" + (i + 1);
+            String name = "Student" + (i + 1);
+            double marks = 5 + random.nextDouble() * 5; // Marks between 5.0 and 10.0
+            students[i] = new Student(id, name, marks);
         }
 
         return students;
     }
 
-    // Bubble Sort Algorithm
-    public static void bubbleSort(List<Student> students, boolean ascending) {
-        int n = students.size();
+    // Hàm so sánh thời gian chạy của các thuật toán sắp xếp
+    public static void compareSortingAlgorithms(Student[] originalArray) {
+        Student[] bubbleSortArray = Arrays.copyOf(originalArray, originalArray.length);
+        Student[] mergeSortArray = Arrays.copyOf(originalArray, originalArray.length);
+        Student[] quickSortArray = Arrays.copyOf(originalArray, originalArray.length);
+
+        // Thực hiện sắp xếp Bubble Sort và đo thời gian
+        long startTime = System.nanoTime();
+        bubbleSort(bubbleSortArray);
+        long endTime = System.nanoTime();
+        System.out.println("Bubble Sort Time: " + (endTime - startTime) + " nanoseconds");
+
+        // Thực hiện sắp xếp Merge Sort và đo thời gian
+        startTime = System.nanoTime();
+        mergeSort(mergeSortArray, 0, mergeSortArray.length - 1);
+        endTime = System.nanoTime();
+        System.out.println("Merge Sort Time: " + (endTime - startTime) + " nanoseconds");
+
+        // Thực hiện sắp xếp Quick Sort và đo thời gian
+        startTime = System.nanoTime();
+        quickSort(quickSortArray, 0, quickSortArray.length - 1, true);
+        endTime = System.nanoTime();
+        System.out.println("Quick Sort Time: " + (endTime - startTime) + " nanoseconds");
+    }
+
+    // Bubble Sort
+    public static void bubbleSort(Student[] array) {
+        int n = array.length;
         for (int i = 0; i < n - 1; i++) {
             for (int j = 0; j < n - i - 1; j++) {
-                boolean condition = ascending
-                        ? students.get(j).getMarks() > students.get(j + 1).getMarks()
-                        : students.get(j).getMarks() < students.get(j + 1).getMarks();
-                if (condition) {
-                    Student temp = students.get(j);
-                    students.set(j, students.get(j + 1));
-                    students.set(j + 1, temp);
+                if (array[j].getMarks() > array[j + 1].getMarks()) {
+                    Student temp = array[j];
+                    array[j] = array[j + 1];
+                    array[j + 1] = temp;
                 }
             }
         }
     }
 
-    // Merge Sort Algorithm
-    public static void mergeSort(List<Student> students, boolean ascending) {
-        if (students.size() <= 1) {
-            return;
+    // Merge Sort
+    public static void mergeSort(Student[] array, int left, int right) {
+        if (left < right) {
+            int middle = left + (right - left) / 2;
+            mergeSort(array, left, middle);
+            mergeSort(array, middle + 1, right);
+            merge(array, left, middle, right);
         }
-
-        int mid = students.size() / 2;
-        List<Student> left = new ArrayList<>(students.subList(0, mid));
-        List<Student> right = new ArrayList<>(students.subList(mid, students.size()));
-
-        mergeSort(left, ascending);
-        mergeSort(right, ascending);
-
-        merge(students, left, right, ascending);
     }
 
-    private static void merge(List<Student> students, List<Student> left, List<Student> right, boolean ascending) {
-        int i = 0, j = 0, k = 0;
-        while (i < left.size() && j < right.size()) {
-            boolean condition = ascending
-                    ? left.get(i).getMarks() <= right.get(j).getMarks()
-                    : left.get(i).getMarks() >= right.get(j).getMarks();
-            if (condition) {
-                students.set(k++, left.get(i++));
+    public static void merge(Student[] array, int left, int middle, int right) {
+        Student[] leftArray = Arrays.copyOfRange(array, left, middle + 1);
+        Student[] rightArray = Arrays.copyOfRange(array, middle + 1, right + 1);
+
+        int i = 0, j = 0, k = left;
+        while (i < leftArray.length && j < rightArray.length) {
+            if (leftArray[i].getMarks() <= rightArray[j].getMarks()) {
+                array[k++] = leftArray[i++];
             } else {
-                students.set(k++, right.get(j++));
+                array[k++] = rightArray[j++];
             }
         }
 
-        while (i < left.size()) {
-            students.set(k++, left.get(i++));
+        while (i < leftArray.length) {
+            array[k++] = leftArray[i++];
         }
 
-        while (j < right.size()) {
-            students.set(k++, right.get(j++));
+        while (j < rightArray.length) {
+            array[k++] = rightArray[j++];
         }
     }
 
-    // Quick Sort Algorithm
-    public static void quickSort(List<Student> students, int low, int high, boolean ascending) {
+    // Quick Sort
+    public static void quickSort(Student[] array, int low, int high, boolean ascending) {
         if (low < high) {
-            int pi = partition(students, low, high, ascending);
-            quickSort(students, low, pi - 1, ascending);  // Before pivot
-            quickSort(students, pi + 1, high, ascending); // After pivot
+            int pi = partition(array, low, high, ascending);
+            quickSort(array, low, pi - 1, ascending);
+            quickSort(array, pi + 1, high, ascending);
         }
     }
 
-    private static int partition(List<Student> students, int low, int high, boolean ascending) {
-        Student pivot = students.get(high); // Taking last element as pivot
-        int i = (low - 1);  // Index of smaller element
+    public static int partition(Student[] array, int low, int high, boolean ascending) {
+        Student pivot = array[high];
+        int i = low - 1;
 
         for (int j = low; j < high; j++) {
-            boolean condition = ascending
-                    ? students.get(j).getMarks() < pivot.getMarks()
-                    : students.get(j).getMarks() > pivot.getMarks();
-
+            boolean condition = ascending ? array[j].getMarks() < pivot.getMarks()
+                    : array[j].getMarks() > pivot.getMarks();
             if (condition) {
                 i++;
-                // Swap students[i] and students[j]
-                Student temp = students.get(i);
-                students.set(i, students.get(j));
-                students.set(j, temp);
+                Student temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
             }
         }
 
-        // Swap students[i + 1] and pivot
-        Student temp = students.get(i + 1);
-        students.set(i + 1, students.get(high));
-        students.set(high, temp);
-
-        return i + 1; // Return pivot index
+        Student temp = array[i + 1];
+        array[i + 1] = array[high];
+        array[high] = temp;
+        return i + 1;
     }
 
-    // Main method to test the sorting algorithms
-    public static void main(String[] args) {
-        int studentCount = 1000; // Number of students
-        List<Student> students = generateRandomStudents(studentCount);
-
-        // Test Bubble Sort
-        List<Student> bubbleSortedStudents = new ArrayList<>(students);
-        long startTime = System.nanoTime();
-        bubbleSort(bubbleSortedStudents, true);
-        long endTime = System.nanoTime();
-        System.out.println("Bubble Sort Time: " + (endTime - startTime) + " nanoseconds");
-
-        // Test Merge Sort
-        List<Student> mergeSortedStudents = new ArrayList<>(students);
-        startTime = System.nanoTime();
-        mergeSort(mergeSortedStudents, true);
-        endTime = System.nanoTime();
-        System.out.println("Merge Sort Time: " + (endTime - startTime) + " nanoseconds");
-
-        // Test Quick Sort
-        List<Student> quickSortedStudents = new ArrayList<>(students);
-        startTime = System.nanoTime();
-        quickSort(quickSortedStudents, 0, quickSortedStudents.size() - 1, true);
-        endTime = System.nanoTime();
-        System.out.println("Quick Sort Time: " + (endTime - startTime) + " nanoseconds");
-    }
 }
